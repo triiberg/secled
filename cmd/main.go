@@ -58,8 +58,8 @@ func usage() {
 	fmt.Fprintln(os.Stderr, "  secled get <key>")
 	fmt.Fprintln(os.Stderr, "  secled update <key>")
 	fmt.Fprintln(os.Stderr, "  secled remove <key>")
-	fmt.Fprintln(os.Stderr, "  secled generate-uuid <key>")
-	fmt.Fprintln(os.Stderr, "  secled generate-64hex <key>")
+	fmt.Fprintln(os.Stderr, "  secled generate-uuid [-o] <key>")
+	fmt.Fprintln(os.Stderr, "  secled generate-64hex [-o] <key>")
 }
 
 func printError(err error) {
@@ -313,7 +313,7 @@ func cmdRemove(args []string) error {
 }
 
 func cmdGenerate(args []string, kind string) error {
-	key, err := parseKeyArg(args)
+	key, output, err := parseGenerateArgs(args)
 	if err != nil {
 		return err
 	}
@@ -362,7 +362,45 @@ func cmdGenerate(args []string, kind string) error {
 	}
 	led.Entries[key] = enc
 
-	return saveLedger(path, led)
+	if err := saveLedger(path, led); err != nil {
+		return err
+	}
+
+	if output {
+		_, err := os.Stdout.Write([]byte(value))
+		return err
+	}
+
+	return nil
+}
+
+func parseGenerateArgs(args []string) (string, bool, error) {
+	if len(args) == 0 {
+		return "", false, errors.New("missing key")
+	}
+	if len(args) > 2 {
+		return "", false, errors.New("too many arguments")
+	}
+
+	output := false
+	key := ""
+
+	for _, arg := range args {
+		if arg == "-o" {
+			output = true
+			continue
+		}
+		if key != "" {
+			return "", false, errors.New("key must be a single argument (use quotes for spaces)")
+		}
+		key = arg
+	}
+
+	if key == "" {
+		return "", false, errors.New("missing key")
+	}
+
+	return key, output, nil
 }
 
 func parseKeyArg(args []string) (string, error) {
