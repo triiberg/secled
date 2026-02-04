@@ -4,11 +4,12 @@ The program is called secled.
 
 Secled is a password manager. It is a command line tool that helps with kubectl and curl commands if user needs to use token, or webhook secret or anything else that couldn't be stored in the text files and can't be copied in the commands (otherwise you can see them in the history or they make their way up to some git repo (very bad!)).
 
-Secled stores data in key-value pairs. The values are encrypted and stored in a binary file. In basic setup user will create ~/secled directory, clonse the repo, builds it and runs the binary from that dir. All files are in ~/secled/secled/bin. User will add alias secled='~/secled/secled/bin/secled' into .bashrc and runs like user@box:~$ secled. The storage file is ledger.encrypted in the same dir ~/secled/secled/bin.
+Secled stores data in key-value pairs. The values are encrypted and stored in a binary file. In basic setup user will create `~/secled` directory, clone the repo, build it and run the binary from that dir. All files are in `~/secled/secled/bin`. User will add alias `secled='~/secled/secled/bin/secled'` into .bashrc and runs like user@box:~$ secled. The storage file is ledger.encrypted in the same dir ~/secled/secled/bin.
 
 Secled has explicit login and logout. The command "secled login" asks for the master password. If it's the first time, this will be the master password of the ledger file and secled states that fact (also creates first entry with key "initial" that holds current date and minimal information about the system). Secled prints a shell snippet that sets SECLED_MASTER, and the user runs it with eval in their shell. SECLED_MASTER is used whenever "secled add :key:" or "secled get :key:" is called to decrypt stored data of that key.
+On POSIX shells the snippet is `export SECLED_MASTER='...'` and `unset SECLED_MASTER`. On Windows PowerShell it is `$env:SECLED_MASTER='...'` and `Remove-Item Env:SECLED_MASTER -ErrorAction SilentlyContinue`.
 
-When user wants to add a key/data into the ledger using "secled add 'my-long-key with-space'" that opens standard input (like sudo asks password) where user can paste the key. When hitting enter secled encrypts the data. This requires that SECLED_MASTER is set. If not, return 1 with an error that login is required. Secled stores the key-data pair in an encrypted way in the same directory where the binary of secled locates.
+When user wants to add a key/data into the ledger using "secled add 'my-long-key with-space'" that opens standard input (like sudo asks password) where user can paste the key. When hitting enter secled encrypts the data. This requires that SECLED_MASTER is set. If not, return 1 with an error that login is required. Secled stores the key-data pair in an encrypted way in the same directory where the binary of secled locates. If the key already exists, add must fail and user should use update.
 
 When user wants to retrieve the key/data from ledger, user must run "secled get 'my-long-key with-space'" that prints out the decrypted data of the key. User most likely will use it in pipeline of commands. This command requires env parameter SECLED_MASTER is set. If not, return 1 "Error: login required (SECLED_MASTER is not set)".
 
@@ -29,14 +30,14 @@ Secled helps with tokens, keys and password so the user does not have to copy pa
 4. git clone git@github.com:triiberg/secled.git
 5. cd secled
 6. go build -o bin/secled ./cmd
-7. build is successful ~/secled/secled/bin/secled file exists and is executable
+7. build is successful `~/secled/secled/bin/secled` file exists and is executable
 
 ### Using secled first time
 1. echo 'alias secled="~/secled/secled/bin/secled"' >> ~/.bashrc # if its a linux, it has to work with win and mac too
-2. echo 'alias secled-login="eval \"$(secled login)\""' >> ~/.bashrc
+2. echo 'alias secled-login="eval \"$(secled login)\""' >> `~/.bashrc`
 3. run "secled-login", it will ask the password
 4. enter the password
-5. verify file ~/secled/secled/bin/, there must be a file called ledger.encrypted
+5. verify file `~/secled/secled/bin/`, there must be a file called ledger.encrypted
 6. list the keys (there must be the example key "initial"): secled list
 7. get the data of the key "initial" by running $ secled get initial, that must print out the date when it was created and basic system info
 8. see if the SECLED_MASTER is set by calling echo $SECLED_MASTER
@@ -68,14 +69,42 @@ Secled helps with tokens, keys and password so the user does not have to copy pa
 - the key is a single argument
 - if it has spaces, the user must quote it in the shell, for example: secled get 'my key'
 - add/generate must fail if the key already exists
+- update/remove must fail if the key does not exist
 
 ### Ledger location
 - ledger.encrypted is always stored in the same directory as the secled binary
+- ledger path is determined from the current executable location (os.Executable + dirname)
 
 ### Initial entry
 - key name: initial
 - value fields: created_at (RFC3339), hostname, goos, goarch
 - must use Go standard library only for this info (no OS-specific libraries)
+
+### Crypto and storage format
+- KDF: Argon2id (golang.org/x/crypto/argon2)
+- KDF defaults: time=3, memory=65536 KB, threads=4, keyLen=32, saltLen=16
+- Cipher: AES-256-GCM with random 12-byte nonce per entry
+- AAD: key string bytes
+- Encoding: binary, big-endian integers
+- Header: magic string "SECLED1" + version uint8
+- KDF params in file: time uint32, memory uint32, threads uint8, keyLen uint32, saltLen uint8, salt bytes
+- Entry count: uint32
+- Entry format: keyLen uint32, key bytes, nonce (12 bytes), cipherLen uint32, ciphertext bytes
+
+### Implementation notes
+- read secret from TTY with no echo when available, otherwise read from stdin and trim trailing newline
+- list must be sorted alphabetically
+- login verifies password by decrypting the "initial" entry
+- add/update/remove/get must require SECLED_MASTER
+
+### Dependencies
+- golang.org/x/crypto/argon2
+- golang.org/x/term
+
+### Release workflow
+- GitHub Actions workflow: .github/workflows/release.yml
+- Trigger: push tag matching v*
+- Artifacts: secled-linux-amd64.zip and secled-windows-amd64.zip
 
 ## Not needed functionality
 
@@ -83,6 +112,8 @@ Secled helps with tokens, keys and password so the user does not have to copy pa
 - no API's 
 - no backups
 - no database (sqllight, duck etc)
+- no daemon or background process
+- no flags or config files in first version
 
 ## Programming tips
 
