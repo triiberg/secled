@@ -2,7 +2,6 @@ package main
 
 import (
 	"crypto/rand"
-	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -27,10 +26,10 @@ func generateUUIDv4() (string, error) {
 	), nil
 }
 
-func generate256bSecret() (string, error) {
-	b := make([]byte, 256)
+func generate64Hex() (string, error) {
+	b := make([]byte, 32)
 	if _, err := io.ReadFull(rand.Reader, b); err != nil {
 		return "", err
 	}
-	return base64.RawURLEncoding.EncodeToString(b), nil
+	return hex.EncodeToString(b), nil
 }

@@ -36,8 +36,8 @@ func main() {
 		err = cmdRemove(os.Args[2:])
 	case "generate-uuid":
 		err = cmdGenerate(os.Args[2:], "uuid")
-	case "generate-256b":
-		err = cmdGenerate(os.Args[2:], "256b")
+	case "generate-64hex":
+		err = cmdGenerate(os.Args[2:], "64hex")
 	default:
 		usage()
 		os.Exit(1)
@@ -59,7 +59,7 @@ func usage() {
 	fmt.Fprintln(os.Stderr, "  secled update <key>")
 	fmt.Fprintln(os.Stderr, "  secled remove <key>")
 	fmt.Fprintln(os.Stderr, "  secled generate-uuid <key>")
-	fmt.Fprintln(os.Stderr, "  secled generate-256b <key>")
+	fmt.Fprintln(os.Stderr, "  secled generate-64hex <key>")
 }
 
 func printError(err error) {
@@ -347,8 +347,8 @@ func cmdGenerate(args []string, kind string) error {
 	switch kind {
 	case "uuid":
 		value, err = generateUUIDv4()
-	case "256b":
-		value, err = generate256bSecret()
+	case "64hex":
+		value, err = generate64Hex()
 	default:
 		return errors.New("unknown generator")
 	}

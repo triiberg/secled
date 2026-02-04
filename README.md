@@ -72,9 +72,9 @@ Generate a UUID v4 and store it:
 secled generate-uuid deploy-id
 ```
 
-Generate a 256-byte JWT secret (base64url) and store it:
+Generate a 64-char hex secret and store it:
 ```sh
-secled generate-256b jwt-secret
+secled generate-64hex jwt-secret
 ```
 
 Remove a key:
@@ -138,9 +138,9 @@ Generate a UUID v4 and store it:
 secled generate-uuid deploy-id
 ```
 
-Generate a 256-byte JWT secret (base64url) and store it:
+Generate a 64-char hex secret and store it:
 ```powershell
-secled generate-256b jwt-secret
+secled generate-64hex jwt-secret
 ```
 
 Remove a key:
@@ -155,7 +155,6 @@ secled-logout
 
 ### Copy to your USB stick
 Copy the `bin` directory to your USB drive. The ledger file is stored next to the binary, so keep them together.
-
 
 
 

@@ -62,7 +62,7 @@ Secled helps with tokens, keys and password so the user does not have to copy pa
 - secled update <key>: replaces data of existing key, requires SECLED_MASTER
 - secled remove <key>: deletes a key, requires SECLED_MASTER
 - secled generate-uuid <key>: generates a UUID v4 and stores it under key
-- secled generate-256b <key>: generates 256 random bytes and stores base64url text under key
+- secled generate-64hex <key>: generates 64 hex chars (32 random bytes) and stores it under key
 
 ### Key rules
 - the key is a single argument
