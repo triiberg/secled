@@ -1,7 +1,7 @@
 package main
 
 import (
-	"encoding/base64"
+	"encoding/hex"
 	"strings"
 	"testing"
 )
@@ -35,16 +35,16 @@ func TestGenerateUUIDv4Format(t *testing.T) {
 	}
 }
 
-func TestGenerate256bSecret(t *testing.T) {
-	secret, err := generate256bSecret()
+func TestGenerate64Hex(t *testing.T) {
+	secret, err := generate64Hex()
 	if err != nil {
-		t.Fatalf("generate256bSecret failed: %v", err)
+		t.Fatalf("generate64Hex failed: %v", err)
 	}
-	data, err := base64.RawURLEncoding.DecodeString(secret)
+	data, err := hex.DecodeString(secret)
 	if err != nil {
 		t.Fatalf("decode failed: %v", err)
 	}
-	if len(data) != 256 {
-		t.Fatalf("expected 256 bytes, got %d", len(data))
+	if len(data) != 32 {
+		t.Fatalf("expected 32 bytes, got %d", len(data))
 	}
 }
