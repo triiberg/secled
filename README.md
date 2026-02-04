@@ -79,6 +79,12 @@ Generate a 64-char hex secret and store it:
 secled generate-64hex jwt-secret
 ```
 
+Generate and output the value while storing it:
+```sh
+secled generate-uuid -o deploy-id
+secled generate-64hex -o jwt-secret
+```
+
 Remove a key:
 ```sh
 secled remove ghcr-password
@@ -143,6 +149,12 @@ secled generate-uuid deploy-id
 Generate a 64-char hex secret and store it:
 ```powershell
 secled generate-64hex jwt-secret
+```
+
+Generate and output the value while storing it:
+```powershell
+secled generate-uuid -o deploy-id
+secled generate-64hex -o jwt-secret
 ```
 
 Remove a key:
