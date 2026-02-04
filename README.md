@@ -12,6 +12,17 @@ Keep it on an USB stick (recommended) or in your home directory (still better th
 
 ## Use it on your prompt
 
+### Crate and use secret on the fly!
+
+```kubectl create secret generic jwtkey --from-literal=JWTKEY="`secled generate-64hex my_sandbox_jwtkey -o`" --namespace=q-sandbox ```
+secret/jwtkey created
+
+### Check (better do not print it out, but for demo)
+
+```secled get my_sandbox_jwtkey```
+88638c304f3a1d049dfd68f8bdda4634ae5d4c08f44dfc04c416437383955379
+
+
 ### Using secled for creating Kubernetes secrets
 
 secret="$(secled get ghcr-password)"          
