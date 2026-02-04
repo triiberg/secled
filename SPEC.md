@@ -59,10 +59,15 @@ Secled helps with tokens, keys and password so the user does not have to copy pa
 - secled list: displays all keys that are stored in the ledger
 - secled add <key>: will ask what is the data of the key using stdin, encrypts the data and stores in the file
 - secled get <key>: using SECLED_MASTER password decrypts data of the key and prints out (so it would be easy to use in like kubectl create secret generic my-secret --from-literal=key1=`secled get ghcr-password` ...)
+- secled update <key>: replaces data of existing key, requires SECLED_MASTER
+- secled remove <key>: deletes a key, requires SECLED_MASTER
+- secled generate-uuid <key>: generates a UUID v4 and stores it under key
+- secled generate-64hex <key>: generates 64 hex chars (32 random bytes) and stores it under key
 
 ### Key rules
 - the key is a single argument
 - if it has spaces, the user must quote it in the shell, for example: secled get 'my key'
+- add/generate must fail if the key already exists
 
 ### Ledger location
 - ledger.encrypted is always stored in the same directory as the secled binary
