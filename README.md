@@ -37,7 +37,7 @@ go build -o bin/secled ./cmd
 
 Add aliases to your `~/.bashrc` or `~/.zshrc`:
 ```sh
-alias secled="~/secled/secled/bin/secled"
+alias secled="~/MYGITHUBDIRS/secled/bin/secled"
 alias secled-login='eval "$(secled login)"'
 alias secled-logout='eval "$(secled logout)"'
 ```
@@ -79,7 +79,7 @@ notepad $PROFILE
 ```
 Add these lines:
 ```powershell
-function secled { & "C:\Users\triib\Coding\secled\bin\secled.exe" @Args }
+function secled { & "C:\Users\<user\githubfolders>\secled\bin\secled.exe" @Args }
 function secled-login { & secled login | Invoke-Expression }
 function secled-logout { & secled logout | Invoke-Expression }
 ```
