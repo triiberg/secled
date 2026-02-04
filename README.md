@@ -29,9 +29,42 @@ curl -X POST http://localhost:8080/deploy/mayapp-sandbox/myapp   -H "X-Hub-Signa
 
 ## How to use it
 
-### Compile it yourself
+### Linux/macOS (bash/zsh)
+Build:
 ```sh
 go build -o bin/secled ./cmd
+```
+
+Add aliases to your `~/.bashrc` or `~/.zshrc`:
+```sh
+alias secled="~/secled/secled/bin/secled"
+alias secled-login='eval "$(secled login)"'
+alias secled-logout='eval "$(secled logout)"'
+```
+
+Login:
+```sh
+secled-login
+```
+
+List keys (works without password):
+```sh
+secled list
+```
+
+Add a key:
+```sh
+secled add ghcr-password
+```
+
+Get a key:
+```sh
+secled get ghcr-password
+```
+
+Logout:
+```sh
+secled-logout
 ```
 
 ### Windows (PowerShell)
@@ -74,38 +107,14 @@ Get a key:
 ```powershell
 secled get ghcr-password
 ```
+
+Logout:
+```powershell
+secled-logout
+```
+
 ### Copy to your USB stick
-
-### Initialize
-For bash/zsh, add aliases to your `~/.bashrc` or `~/.zshrc`:
-```sh
-alias secled="~/secled/secled/bin/secled"
-alias secled-login='eval "$(secled login)"'
-alias secled-logout='eval "$(secled logout)"'
-```
-
-Run login and enter your master password:
-```sh
-secled-login
-```
-
-This creates `ledger.encrypted` next to the binary on first run.
-
-### Check your storage
-List keys (works without password):
-```sh
-secled list
-```
-
-Add a key:
-```sh
-secled add ghcr-password
-```
-
-Get a key:
-```sh
-secled get ghcr-password
-```
+Copy the `bin` directory to your USB drive. The ledger file is stored next to the binary, so keep them together.
 
 
 
