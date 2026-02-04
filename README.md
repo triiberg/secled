@@ -57,9 +57,29 @@ Add a key:
 secled add ghcr-password
 ```
 
+Update a key:
+```sh
+secled update ghcr-password
+```
+
 Get a key:
 ```sh
 secled get ghcr-password
+```
+
+Generate a UUID v4 and store it:
+```sh
+secled generate-uuid deploy-id
+```
+
+Generate a 256-byte JWT secret (base64url) and store it:
+```sh
+secled generate-256b jwt-secret
+```
+
+Remove a key:
+```sh
+secled remove ghcr-password
 ```
 
 Logout:
@@ -103,9 +123,29 @@ Add a key:
 secled add ghcr-password
 ```
 
+Update a key:
+```powershell
+secled update ghcr-password
+```
+
 Get a key:
 ```powershell
 secled get ghcr-password
+```
+
+Generate a UUID v4 and store it:
+```powershell
+secled generate-uuid deploy-id
+```
+
+Generate a 256-byte JWT secret (base64url) and store it:
+```powershell
+secled generate-256b jwt-secret
+```
+
+Remove a key:
+```powershell
+secled remove ghcr-password
 ```
 
 Logout:
@@ -115,7 +155,6 @@ secled-logout
 
 ### Copy to your USB stick
 Copy the `bin` directory to your USB drive. The ledger file is stored next to the binary, so keep them together.
-
 
 
 

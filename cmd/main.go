@@ -30,6 +30,14 @@ func main() {
 		err = cmdAdd(os.Args[2:])
 	case "get":
 		err = cmdGet(os.Args[2:])
+	case "update":
+		err = cmdUpdate(os.Args[2:])
+	case "remove":
+		err = cmdRemove(os.Args[2:])
+	case "generate-uuid":
+		err = cmdGenerate(os.Args[2:], "uuid")
+	case "generate-256b":
+		err = cmdGenerate(os.Args[2:], "256b")
 	default:
 		usage()
 		os.Exit(1)
@@ -48,6 +56,10 @@ func usage() {
 	fmt.Fprintln(os.Stderr, "  secled list")
 	fmt.Fprintln(os.Stderr, "  secled add <key>")
 	fmt.Fprintln(os.Stderr, "  secled get <key>")
+	fmt.Fprintln(os.Stderr, "  secled update <key>")
+	fmt.Fprintln(os.Stderr, "  secled remove <key>")
+	fmt.Fprintln(os.Stderr, "  secled generate-uuid <key>")
+	fmt.Fprintln(os.Stderr, "  secled generate-256b <key>")
 }
 
 func printError(err error) {
@@ -161,6 +173,10 @@ func cmdAdd(args []string) error {
 		return err
 	}
 
+	if _, exists := led.Entries[key]; exists {
+		return errors.New("key already exists (use update)")
+	}
+
 	secret, err := readSecret("Secret value: ")
 	if err != nil {
 		return err
@@ -215,6 +231,138 @@ func cmdGet(args []string) error {
 
 	_, err = os.Stdout.Write(plaintext)
 	return err
+}
+
+func cmdUpdate(args []string) error {
+	key, err := parseKeyArg(args)
+	if err != nil {
+		return err
+	}
+	if key == reservedInitialKey {
+		return errors.New("key 'initial' is reserved")
+	}
+
+	password, err := requirePassword()
+	if err != nil {
+		return err
+	}
+
+	path, err := ledgerPath()
+	if err != nil {
+		return err
+	}
+	led, err := loadLedger(path)
+	if err != nil {
+		return err
+	}
+	masterKey, err := verifyPassword(led, password)
+	if err != nil {
+		return err
+	}
+
+	if _, exists := led.Entries[key]; !exists {
+		return errors.New("key not found")
+	}
+
+	secret, err := readSecret("New secret value: ")
+	if err != nil {
+		return err
+	}
+
+	enc, err := encryptEntry(masterKey, key, secret)
+	if err != nil {
+		return err
+	}
+	led.Entries[key] = enc
+
+	return saveLedger(path, led)
+}
+
+func cmdRemove(args []string) error {
+	key, err := parseKeyArg(args)
+	if err != nil {
+		return err
+	}
+	if key == reservedInitialKey {
+		return errors.New("key 'initial' is reserved")
+	}
+
+	password, err := requirePassword()
+	if err != nil {
+		return err
+	}
+
+	path, err := ledgerPath()
+	if err != nil {
+		return err
+	}
+	led, err := loadLedger(path)
+	if err != nil {
+		return err
+	}
+	if _, err := verifyPassword(led, password); err != nil {
+		return err
+	}
+
+	if _, exists := led.Entries[key]; !exists {
+		return errors.New("key not found")
+	}
+	delete(led.Entries, key)
+
+	return saveLedger(path, led)
+}
+
+func cmdGenerate(args []string, kind string) error {
+	key, err := parseKeyArg(args)
+	if err != nil {
+		return err
+	}
+	if key == reservedInitialKey {
+		return errors.New("key 'initial' is reserved")
+	}
+
+	password, err := requirePassword()
+	if err != nil {
+		return err
+	}
+
+	path, err := ledgerPath()
+	if err != nil {
+		return err
+	}
+	led, err := loadLedger(path)
+	if err != nil {
+		return err
+	}
+	masterKey, err := verifyPassword(led, password)
+	if err != nil {
+		return err
+	}
+
+	if _, exists := led.Entries[key]; exists {
+		return errors.New("key already exists (use update)")
+	}
+
+	var value string
+	switch kind {
+	case "uuid":
+		value, err = generateUUIDv4()
+	case "256b":
+		value, err = generate256bSecret()
+	default:
+		return errors.New("unknown generator")
+	}
+	if err != nil {
+		return err
+	}
+
+	enc, err := encryptEntry(masterKey, key, []byte(value))
+	if err != nil {
+		return err
+	}
+	led.Entries[key] = enc
+
+	return saveLedger(path, led)
 }
 
 func parseKeyArg(args []string) (string, error) {
