@@ -1,0 +1,68 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            name: linux-amd64
+            goos: linux
+            goarch: amd64
+            ext: ""
+            archive: secled-linux-amd64.zip
+          - os: windows-latest
+            name: windows-amd64
+            goos: windows
+            goarch: amd64
+            ext: ".exe"
+            archive: secled-windows-amd64.zip
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        shell: bash
+        run: |
+          mkdir -p dist
+          go build -o "dist/secled-${{ matrix.name }}${{ matrix.ext }}" ./cmd
+
+      - name: Archive (Linux)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          cd dist
+          zip -j "${{ matrix.archive }}" "secled-${{ matrix.name }}${{ matrix.ext }}"
+
+      - name: Archive (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "dist\secled-${{ matrix.name }}${{ matrix.ext }}" -DestinationPath "dist\${{ matrix.archive }}"
+
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/${{ matrix.archive }}
