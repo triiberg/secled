@@ -4,7 +4,9 @@
 
 How to keep secrets secret. API Keys, long living tokens etc. Bad practice to keep them in txt file. This software allows to encrypt the secrets and use them in commands. 
 
+
 Compile this software yourself so you can aware how it works. See compiling options below.
+If you don't have tools, check for releases (built by Github): `https://github.com/triiberg/secled/releases`
 
 Keep it on an USB stick (recommended) or in your home directory (still better than txt file (in the Git repo :D))
 
